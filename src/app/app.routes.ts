@@ -58,7 +58,7 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/start/start2/start2/start2.page').then( m => m.Start2Page)
   },
   {
-    path: 'selection',
+    path: 'selection/:id',
     loadComponent: () => import('./pages/selection/selection.page').then( m => m.SelectionPage)
   },
   {
@@ -85,7 +85,10 @@ export const routes: Routes = [
     path: 'movie-detail/:id',
     loadComponent: () => import('./pages/movie-detail/movie-detail.page').then( m => m.MovieDetailPage)
   },
-
+  {
+    path: 'selection/:id',
+    loadComponent: () => import('./pages/selection/selection.page').then( m => m.SelectionPage)
+  },
 
 
   // {

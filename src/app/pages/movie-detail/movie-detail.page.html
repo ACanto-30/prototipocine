@@ -9,6 +9,7 @@
       <p><strong>Duración:</strong> {{movie.duration}} minutos</p>
       <p><strong>Fecha de estreno:</strong> {{movie.releaseDate}}</p>
       <p><strong>Clasificación:</strong> {{movie.classification.classificationName}}</p>
+      <ion-button (click)="goToShowtimeHours(movie.idMovie)">CHECKOUT</ion-button>
     </ion-card-content>
   </ion-card>
 </ion-content>

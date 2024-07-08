@@ -1,24 +1,22 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, ElementRef, Renderer2, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { 
-  IonHeader, 
-  IonToolbar, 
-  IonTitle, 
-  IonContent, 
+import {
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonContent,
   IonButton,
   IonProgressBar,
   IonButtons,
   IonIcon,
   IonGrid,
   IonRow,
-  IonCol
+  IonCol, NavController
 } from '@ionic/angular/standalone'
-
-interface Seat {
-  id: number;
-  status: 'available' | 'reserved' | 'selected';
-}
+import {CinemaApiService} from "../../services/cinema-api.service";
+import { CharPipe } from 'src/app/pipes/char.pipe';
+import { BehaviorSubject } from 'rxjs';
 
 @Component({
   selector: 'app-seats',
@@ -38,20 +36,92 @@ interface Seat {
     IonTitle,
     IonGrid,
     IonRow,
-    IonCol
+    IonCol,
+    CharPipe
   ]
 
 })
-export class SeatsPage {
+export class SeatsPage implements OnInit {
   title: string = 'Seats';
-  seats: Seat[][] = [];
-  selectedSeats: Seat[] = [];
+  showtimeHourId: string = '';
+  occupiedSeats: any; // Lista de posiciones ocupadas
+  selectedSeats: any[] = [];
 
-  constructor(private router: Router) {
-    this.initializeSeats();
+  private dataLoaded: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+
+  constructor(private router: Router, private navCtrl: NavController, private movieApiService: CinemaApiService, private el: ElementRef, private renderer: Renderer2) {}
+
+  ngOnInit() {
+    const navigation = this.router.getCurrentNavigation();
+    const state = navigation?.extras?.state;
+    if (state) {
+      this.showtimeHourId = state['showtimeHourId'];
+      if (this.showtimeHourId) {
+        this.movieApiService.getSeatsFromShowtimeHours(this.showtimeHourId).subscribe({
+          next: (data) => {
+            this.occupiedSeats = data;
+          },
+          error: (error) => {
+            console.error('Error fetching seats', error);
+          },
+          complete: () => {
+            console.log('Seats fetch complete');
+            console.log(this.occupiedSeats);
+            this.dataLoaded.next(true);
+          }
+        });
+      } else {
+        console.error('No showtimeHourId ID found in route parameters');
+      }
+    }
   }
 
-  selectSeat(seat: Seat) {
+  ngAfterViewInit() {
+    this.dataLoaded.subscribe((isLoaded) => {
+      if (isLoaded) {
+        this.disableOccupiedSeats();
+      }
+    });
+  }
+
+  disableOccupiedSeats() {
+    this.occupiedSeats.forEach((seat: { position: string }) => {
+      const button = this.el.nativeElement.querySelector(`.${seat.position}`);
+      console.log(button);
+      if (button) {
+        this.renderer.setAttribute(button, 'disabled', 'true');
+      }
+    });
+  }
+  
+
+  toggleSeatSelection(seat: { idSeat: number, position: string }) {
+    console.log(seat.idSeat);
+    const index = this.selectedSeats.findIndex(s => s.idSeat === seat.idSeat);
+    console.log(index);
+    const button = this.el.nativeElement.querySelector(`.${seat.position}`);
+
+    if (index > -1) {
+      this.selectedSeats.splice(index, 1);
+      if (button) {
+        this.renderer.removeClass(button, 'selected');
+        console.log(this.selectedSeats);
+      }
+    } else {
+      this.selectedSeats.push(seat);
+      if (button) {
+        this.renderer.addClass(button, 'selected');
+        console.log(this.selectedSeats);
+      }
+    }
+  }
+
+  getPosition(rowIndex: number, colIndex: number): string {
+    const rowChar = String.fromCharCode('A'.charCodeAt(0) + rowIndex);
+    return `${rowChar}${colIndex + 1}`;
+  }
+  
+  /*selectSeat(seat: Seat) {
     // Lógica para seleccionar/deseleccionar asientos
     if (seat.status === 'available') {
       seat.status = 'selected';
@@ -60,10 +130,10 @@ export class SeatsPage {
       seat.status = 'available';
       this.selectedSeats = this.selectedSeats.filter(s => s !== seat);
     }
-  }
+  }*/
 
 
-  private initializeSeats() {
+  /*private initializeSeats() {
     // Ejemplo de inicialización de asientos
     const totalRows = 3;
     const seatsPerRow = 8;
@@ -78,12 +148,14 @@ export class SeatsPage {
       }
       this.seats.push(rowSeats);
     }
-  }
+  }*/
 
   goToUserData() {
-    this.router.navigate(['/user-data'], { state: { selectedSeats: this.selectedSeats } });
+    this.router.navigate(['/user-data']);
     console.log('Selected seats:', this.selectedSeats);
   }
+  
+
   navigateBack() {
     this.router.navigate(['/selection']);
   }

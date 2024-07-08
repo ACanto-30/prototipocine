@@ -1,45 +1,39 @@
 <ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-button
-      (click)="navigateBack()"> 
-        <ion-icon 
-        name="arrow-back-outline"
-        ></ion-icon>
+      <ion-button (click)="navigateBack()">
+        <ion-icon name="arrow-back-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
     <ion-title>{{ title }}</ion-title>
-    <ion-progress-bar 
-    type="indeterminate"
-    ></ion-progress-bar>
+    <ion-progress-bar type="indeterminate"></ion-progress-bar>
   </ion-toolbar>
 </ion-header>
 
-
 <ion-content>
-  <ion-grid>
-    <!-- Iteramos sobre las filas de asientos -->
-    <ion-row *ngFor="let rowIndex of [0, 1, 2]">
-      <ion-col size="4" *ngFor="let colIndex of [0, 1, 2]">
-        <!-- Calculamos el índice del asiento dentro de la matriz de 3x6 -->
-        <div class="seat-container">
-          <!-- Iteramos sobre los asientos en cada columna -->
-          <div *ngFor="let seat of seats[rowIndex * 3 + colIndex]" class="seat" [ngClass]="seat.status" (click)="selectSeat(seat)">
-            Seat {{ seat.id }}
-          </div>
-        </div>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
-
-  <!-- Leyenda de estados de asientos -->
-  <div class="legend">
-    <div class="legend-item available">Available</div>
-    <div class="legend-item reserved">Reserved</div>
-    <div class="legend-item selected">Selected</div>
+  <div class="div__container">
+    <div class="div__container-seat-letter">A</div>
+    <div class="div__container-buttons">
+      <ion-button *ngFor="let i of [].constructor(4); let index = index" 
+                  [class]="'A' + (index + 1)" 
+                  (click)="toggleSeatSelection({ idSeat: index + 1, position: 'A' + (index + 1) })">
+        {{index + 1}}
+      </ion-button>
+    </div>
   </div>
 
-  <!-- Botón de checkout -->
-  <ion-button expand="block" 
-  (click)="goToUserData()" color="secondary">Checkout</ion-button>
+  <div *ngFor="let row of [].constructor(3); let rowIndex = index">
+    <div class="div__container">
+      <div class="div__container-seat-letter">{{('A'.charCodeAt(0) + rowIndex + 1) | char}}</div>
+      <div class="div__container-buttons">
+        <ion-button *ngFor="let col of [].constructor(6); let colIndex = index" 
+                    [class]="getPosition(rowIndex + 1, colIndex)" 
+                    (click)="toggleSeatSelection({ idSeat: (rowIndex + 1) * 6 + colIndex - 1, position: getPosition(rowIndex + 1, colIndex) })">
+          {{colIndex + 1}}
+        </ion-button>
+      </div>
+    </div>
+  </div>
+
+  <ion-button (click)="goToUserData()">NEXT</ion-button>
 </ion-content>

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
-import { MoviesApiService } from "../../services/movies-api.service";
+import { CinemaApiService } from "../../services/cinema-api.service";
 import { NavController } from '@ionic/angular/standalone';
 
 @Component({
@@ -14,7 +14,7 @@ import { NavController } from '@ionic/angular/standalone';
 export class HomePage implements OnInit {
   movies: any[] = [];
 
-  constructor(private moviesApiService: MoviesApiService, private navCtrl: NavController) { }
+  constructor(private moviesApiService: CinemaApiService, private navCtrl: NavController) { }
 
   goToMovieDetail(movieId: number) {
     this.navCtrl.navigateForward(`/movie-detail/${movieId}`);
